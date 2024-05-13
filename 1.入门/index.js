@@ -5,6 +5,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //引入stats性能监视器
 import Stats from 'three/addons/libs/stats.module.js';
+// 引入dat.gui中的一个类GUI
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+const gui = new GUI();//创建一个GUI对象
+gui.domElement.style.right = '0px';
+gui.domElement.style.width = '300px';
 
 //实例化一个stats对象
 const stats = new Stats();
@@ -36,18 +42,29 @@ const geometry = new THREE.BoxGeometry(50, 50, 50);
 //     transparent: true,//设置透明
 //     opacity: 0.5//设置透明度
 // });
-//材质对象(漫反射材质)
-const material = new THREE.MeshLambertMaterial({
+
+// //材质对象(漫反射材质)
+// const material = new THREE.MeshLambertMaterial({
+//     //红色
+//     color: 0xff0000,
+//     //设置透明
+//     transparent: true,
+//     //设置透明度
+//     opacity: 0.5,
+//     //设置混合模式
+//     blending: THREE.AdditiveBlending,
+//     //设置矩形平面和圆形平面双面可见
+//     side: THREE.DoubleSide
+// });
+
+//材质对象(高光材料)
+const material = new THREE.MeshPhongMaterial({
     //红色
     color: 0xff0000,
-    //设置透明
-    transparent: true,
-    //设置透明度
-    opacity: 0.5,
-    //设置混合模式
-    blending: THREE.AdditiveBlending,
-    //设置矩形平面和圆形平面双面可见
-    side: THREE.DoubleSide
+    //高光强度
+    shininess: 50,
+    //高光部分颜色
+    specular: 0x444444
 });
 const mesh = new THREE.Mesh(geometry, material);//网格模型对象
 //设置网格模型位置
@@ -69,6 +86,9 @@ scene.add(axesHelper);
 //     }
     
 // }
+/**
+ * 光源设置
+ */
 
 //创建一个点光源
 const point = new THREE.PointLight(0xffffff,1.0);
@@ -83,7 +103,7 @@ scene.add(pointLightHelper);
 
 //创建一个环境光
 const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-scene.add(ambient);
+scene.add(ambient);//添加到场景中
 
 //创建一个平行光光源
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -106,16 +126,24 @@ const height = window.innerHeight;//窗口高度
  */
 //创建相机对象
 const camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 2000);//透视相机
-camera.position.set(230, 300, 280);//相机位置
+camera.position.set(186, 175, 250);//相机位置
 camera.lookAt(mesh.position);//设置相机方向(指向的场景对象)
 
 /**
  * 渲染器设置
  */
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({
+    antialias: true,//开启抗锯齿
+});
 renderer.setSize(width, height);//设置渲染区域尺寸
 renderer.render(scene, camera);//渲染出场景
 document.body.appendChild(renderer.domElement);//将渲染结果显示在网页中
+//查看屏幕像素比
+console.log(window.devicePixelRatio)
+//设置像素比
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x444567, 1);//设置背景颜色
+
 /**
  * 轨道控制器
  */
@@ -141,3 +169,19 @@ window.onresize = function () {
     renderer.setSize(window.innerWidth, window.innerHeight);//更新渲染器宽高比例
     renderer.render(scene, camera);//更新渲染器
 }
+
+gui.add(ambient, 'intensity', 0, 2.0).name('环境光强度');
+gui.add(directionalLight, 'intensity', 0, 2.0).name('平行光强度');
+gui.add(mesh.position, 'x', -1000, 1000).name('x轴坐标');
+gui.add(mesh.position, 'y', -1000, 1000).name('y轴坐标');
+gui.add(mesh.position, 'z', -1000, 1000).name('z轴坐标');
+
+const obj = {
+    'x':30,
+    color:0xffffff,
+    '透明度':0.5,
+    '双面可见':false
+}
+gui.addColor(obj, 'color').onChange(function (value) {
+    material.color.set(value);
+})
