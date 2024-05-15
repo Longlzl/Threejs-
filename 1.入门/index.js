@@ -12,6 +12,22 @@ const gui = new GUI();//创建一个GUI对象
 gui.domElement.style.right = '0px';
 gui.domElement.style.width = '300px';
 
+// gui.add(ambient, 'intensity', 0, 2.0).name('环境光强度');
+// gui.add(directionalLight, 'intensity', 0, 2.0).name('平行光强度');
+// gui.add(mesh.position, 'x', -1000, 1000).name('x轴坐标');
+// gui.add(mesh.position, 'y', -1000, 1000).name('y轴坐标');
+// gui.add(mesh.position, 'z', -1000, 1000).name('z轴坐标');
+
+const obj = {
+    x:30,
+    color:0xffffff,
+    tool:false,
+}
+gui.addColor(obj, 'color').onChange(function (value) {
+    material.color.set(value);
+})
+gui.add(obj, 'tool').name('是否旋转');
+
 //实例化一个stats对象
 const stats = new Stats();
 //添加stats
@@ -154,10 +170,10 @@ controls.addEventListener('change', function () {//监听鼠标、键盘事件
 
 //渲染循环
 function animate() {
+    if(obj.tool)mesh.rotateY(0.01);
     stats.update();//更新性能监视器
     requestAnimationFrame(animate);
     // mesh.rotation.x += 0.01;
-    mesh.rotation.y += 0.01;
     renderer.render(scene, camera);
 }
 animate();
@@ -172,16 +188,18 @@ window.onresize = function () {
 
 gui.add(ambient, 'intensity', 0, 2.0).name('环境光强度');
 gui.add(directionalLight, 'intensity', 0, 2.0).name('平行光强度');
-gui.add(mesh.position, 'x', -1000, 1000).name('x轴坐标');
-gui.add(mesh.position, 'y', -1000, 1000).name('y轴坐标');
-gui.add(mesh.position, 'z', -1000, 1000).name('z轴坐标');
+const mat = gui.addFolder('物体');
+mat.add(mesh.position, 'x', -1000, 1000).name('x轴坐标');
+mat.add(mesh.position, 'y', -1000, 1000).name('y轴坐标');
+mat.add(mesh.position, 'z', -1000, 1000).name('z轴坐标');
+mat.close();
 
-const obj = {
-    'x':30,
-    color:0xffffff,
-    '透明度':0.5,
-    '双面可见':false
-}
-gui.addColor(obj, 'color').onChange(function (value) {
-    material.color.set(value);
-})
+// const obj = {
+//     x:30,
+//     color:0xffffff,
+//     bool:false,
+// }
+// gui.addColor(obj, 'color').onChange(function (value) {
+//     material.color.set(value);
+// })
+// gui.add(obj, 'bool').name('是否旋转');
